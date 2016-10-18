@@ -2,6 +2,7 @@ package org.webswing.server.util;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Constructor;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -49,7 +50,7 @@ import org.webswing.model.server.SwingDescriptor;
 import org.webswing.server.ConfigurationManager;
 import org.webswing.server.handler.LoginServlet;
 import org.webswing.server.model.EncodedMessage;
-
+import sun.font.TrueTypeFont;
 import main.Main;
 
 public class ServerUtil {
@@ -451,7 +452,9 @@ public class ServerUtil {
 		Map<File, String> result = new HashMap<File, String>();
 		for (File file : fontFiles) {
 			try {
-				sun.font.TrueTypeFont ttfFile = new sun.font.TrueTypeFont(file.getAbsolutePath(), null, 0, false);
+				Constructor<TrueTypeFont> constructor = sun.font.TrueTypeFont.class.getDeclaredConstructor(String.class, Object.class, Integer.TYPE, Boolean.TYPE);
+				constructor.setAccessible(true);
+				sun.font.TrueTypeFont ttfFile = constructor.newInstance(file.getAbsolutePath(), null, 0, false);
 				String name = ttfFile.getFullName();
 				result.put(file, name);
 			} catch (Exception e) {

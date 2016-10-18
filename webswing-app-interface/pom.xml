@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-client</artifactId>
-			<version>5.13.3</version>
+			<version>5.10.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>org.apache.bcel</groupId>
 			<artifactId>bcel</artifactId>
-			<version>6.0</version>
+			<version>5.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
