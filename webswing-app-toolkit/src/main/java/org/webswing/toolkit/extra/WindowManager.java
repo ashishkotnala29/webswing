@@ -205,6 +205,10 @@ public class WindowManager {
 		return zorder.extractNonVisibleAreas();
 	}
 
+	public List<String> getZOrder() {
+		return zorder.getZOrder();
+	}
+
 	public void requestRepaintAfterMove(Window w, Rectangle originalPosition) {
 		zorder.requestRepaintAfterMove(w, originalPosition);
 	}

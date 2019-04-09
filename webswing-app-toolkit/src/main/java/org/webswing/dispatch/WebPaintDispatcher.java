@@ -78,21 +78,27 @@ public class WebPaintDispatcher {
 							}
 							currentAreasToUpdate = areasToUpdate;
 							areasToUpdate = Util.postponeNonShowingAreas(currentAreasToUpdate);
-							if (currentAreasToUpdate.size() == 0 && moveAction == null) {
-								return;
-							}
-							windowNonVisibleAreas = Util.getWebToolkit().getWindowManager().extractNonVisibleAreas();
-							json = Util.fillJsonWithWindowsData(currentAreasToUpdate, windowNonVisibleAreas);
+
 							if (Util.isDD()) {
+								if (currentAreasToUpdate.size() == 0) {
+									return;
+								}
+								List<String> zorder = Util.getWebToolkit().getWindowManager().getZOrder();
+								json = Util.fillWithDDWindowsData(zorder);
 								windowWebImages = new HashMap<String, Image>();
-								windowWebImages = Util.extractWindowWebImages(json, windowWebImages);
+								windowWebImages = Util.extractWindowWebImages(currentAreasToUpdate.keySet(), windowWebImages);
 							} else {
+								if (currentAreasToUpdate.size() == 0 && moveAction == null) {
+									return;
+								}
+								windowNonVisibleAreas = Util.getWebToolkit().getWindowManager().extractNonVisibleAreas();
+								json = Util.fillWithWindowsData(currentAreasToUpdate, windowNonVisibleAreas);
 								windowImages = new HashMap<String, Map<Integer, BufferedImage>>();
 								windowImages = Util.extractWindowImages(json, windowImages);
-							}
-							if (moveAction != null) {
-								json.setMoveAction(moveAction);
-								moveAction = null;
+								if (moveAction != null ) {
+									json.setMoveAction(moveAction);
+									moveAction = null;
+								}
 							}
 							if (focusEvent != null) {
 								json.setFocusEvent(focusEvent);
@@ -261,15 +267,19 @@ public class WebPaintDispatcher {
 
 	public void notifyWindowMoved(Window w, Rectangle from, Rectangle to) {
 		synchronized (webPaintLock) {
-			if (moveAction == null) {
-				moveAction = new WindowMoveActionMsg(from.x, from.y, to.x, to.y, from.width, from.height);
-				notifyRepaintOffScreenAreas(w, moveAction);
-			} else if (moveAction.getDx() == from.x && moveAction.getDy() == from.y && moveAction.getWidth() == from.width && moveAction.getHeight() == from.height) {
-				moveAction.setDx(to.x);
-				moveAction.setDy(to.y);
-				notifyRepaintOffScreenAreas(w, moveAction);
-			} else {
+			if(Util.isDD()){
 				notifyWindowRepaint(w);
+			}else{
+				if (moveAction == null) {
+					moveAction = new WindowMoveActionMsg(from.x, from.y, to.x, to.y, from.width, from.height);
+					notifyRepaintOffScreenAreas(w, moveAction);
+				} else if (moveAction.getDx() == from.x && moveAction.getDy() == from.y && moveAction.getWidth() == from.width && moveAction.getHeight() == from.height) {
+					moveAction.setDx(to.x);
+					moveAction.setDy(to.y);
+					notifyRepaintOffScreenAreas(w, moveAction);
+				} else {
+					notifyWindowRepaint(w);
+				}
 			}
 		}
 	}

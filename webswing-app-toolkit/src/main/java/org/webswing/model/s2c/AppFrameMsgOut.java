@@ -17,7 +17,7 @@ public class AppFrameMsgOut implements MsgOut {
 	private CopyEventMsg copyEvent;
 	private PasteRequestMsg pasteRequest;
 	private FileDialogEventMsg fileDialogEvent;
-	private List<WindowMsg> windows;
+	private List<WindowMsg> windows = new ArrayList<>();
 	private WindowMsg closedWindow;
 	private SimpleEventMsgOut event;
 	private PixelsAreaRequestMsgOut pixelsRequest;
@@ -31,16 +31,12 @@ public class AppFrameMsgOut implements MsgOut {
 
 	public AppFrameMsgOut() {
 	}
-	
+
 	public WindowMsg getOrCreateWindowById(String guid) {
-		if (windows != null) {
-			for (WindowMsg w : windows) {
-				if (w.getId().equals(guid)) {
-					return w;
-				}
+		for (WindowMsg w : windows) {
+			if (w.getId().equals(guid)) {
+				return w;
 			}
-		} else {
-			windows = new ArrayList<WindowMsg>();
 		}
 		WindowMsg window = new WindowMsg();
 		window.setId(guid);

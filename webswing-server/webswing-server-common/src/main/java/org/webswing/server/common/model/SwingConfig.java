@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @ConfigType(metadataGenerator = SwingConfig.SwingConfigurationMetadataGenerator.class)
-@ConfigFieldOrder({ "name", "theme", "fontConfig", "directdraw", "javaFx", "debug", "userDir", "jreExecutable", "javaVersion", "classPathEntries", "vmArgs", "launcherType", "launcherConfig", "maxClients", "sessionMode", "swingSessionTimeout", "timeoutIfInactive", "monitorEdtEnabled", "loadingAnimationDelay", "allowStealSession", "autoLogout",
+@ConfigFieldOrder({ "name", "theme", "fontConfig", "directdraw", "javaFx", "compositingWinManager", "debug", "userDir", "jreExecutable", "javaVersion", "classPathEntries", "vmArgs", "launcherType", "launcherConfig", "maxClients", "sessionMode", "swingSessionTimeout", "timeoutIfInactive", "monitorEdtEnabled", "loadingAnimationDelay", "allowStealSession", "autoLogout",
 		"goodbyeUrl", "sessionLogging", "loggingDirectory", "sessionLogFileSize", "sessionLogMaxFileSize", "isolatedFs", "allowUpload", "allowDelete", "allowDownload", "allowAutoDownload", "transparentFileOpen", "transparentFileSave", "transferDir", "clearTransferDir", "uploadMaxSize", "allowedCorsOrigins", "allowJsLink", "allowLocalClipboard", "allowServerPrinting","recordingsFolder" })
 public interface SwingConfig extends Config {
 
@@ -46,7 +46,11 @@ public interface SwingConfig extends Config {
 	@ConfigFieldDefaultValueBoolean(true)
 	public boolean isDirectdraw();
 
-	@ConfigField(tab = ConfigGroup.General, label = "JavaFx Support (experimental)", description = "!Only for Java8! Enables native or embeded JavaFx framework support.")
+	@ConfigField(tab = ConfigGroup.General, label = "Compositing Window Manager", description = "Use window manager that provides an off-screen buffer for each window. Necessary for translucent and shaped windows. Allows advanced window positioning when embedding. Recommended with DirectDraw rendering mode.")
+	@ConfigFieldDefaultValueBoolean(false)
+	public boolean isCompositingWinManager();
+
+	@ConfigField(tab = ConfigGroup.General, label = "JavaFx Support", description = "Enables native or embeded JavaFx framework support.")
 	@ConfigFieldDefaultValueBoolean(false)
 	public boolean isJavaFx();
 

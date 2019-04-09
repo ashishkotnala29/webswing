@@ -261,13 +261,12 @@ public class Util {
 		return windowImages;
 	}
 
-	public static Map<String, Image> extractWindowWebImages(AppFrameMsgOut json, Map<String, Image> webImages) {
-		for (Iterator<WindowMsg> i = json.getWindows().iterator(); i.hasNext(); ) {
-			WindowMsg window = i.next();
-			WebWindowPeer w = findWindowPeerById(window.getId());
-			if (!window.getId().equals(WebToolkit.BACKGROUND_WINDOW_ID)) {
-				Image webimageString = w.extractWebImage();
-				webImages.put(window.getId(), webimageString);
+	public static Map<String, Image> extractWindowWebImages(Set<String> updatedWindows, Map<String, Image> webImages) {
+		for (String windowId:updatedWindows) {
+			WebWindowPeer w = findWindowPeerById(windowId);
+			if(w!=null) {
+				Image webimage = w.extractWebImage();
+				webImages.put(windowId, webimage);
 			}
 		}
 		return webImages;
@@ -289,15 +288,15 @@ public class Util {
 
 	public static void encodeWindowWebImages(Map<String, Image> windowWebImages, AppFrameMsgOut json) {
 		for (WindowMsg window : json.getWindows()) {
-			if (!window.getId().equals(WebToolkit.BACKGROUND_WINDOW_ID)) {
-				Image wi = windowWebImages.get(window.getId());
+			Image wi = windowWebImages.get(window.getId());
+			if(wi !=null) {
 				window.setDirectDraw(Services.getDirectDrawService().buildWebImage(wi));
 			}
 		}
 	}
 
 	@SuppressWarnings("restriction")
-	public static AppFrameMsgOut fillJsonWithWindowsData(Map<String, Set<Rectangle>> currentAreasToUpdate, Map<String, List<Rectangle>> windowNonVisibleAreas) {
+	public static AppFrameMsgOut fillWithWindowsData(Map<String, Set<Rectangle>> currentAreasToUpdate, Map<String, List<Rectangle>> windowNonVisibleAreas) {
 		AppFrameMsgOut json = new AppFrameMsgOut();
 		for (String windowId : currentAreasToUpdate.keySet()) {
 			WebWindowPeer ww = Util.findWindowPeerById(windowId);
@@ -331,6 +330,22 @@ public class Util {
 			}
 		}
 		return json;
+	}
+
+	public static AppFrameMsgOut fillWithDDWindowsData(List<String> zorder) {
+		AppFrameMsgOut frame = new AppFrameMsgOut();
+		for (String windowId : zorder) {
+			WebWindowPeer ww = Util.findWindowPeerById(windowId);
+			if (ww != null) {
+				WindowMsg window = frame.getOrCreateWindowById(windowId);
+				Point location = ww.getLocationOnScreen();
+				window.setPosX(location.x);
+				window.setPosY(location.y);
+				window.setWidth(ww.getBounds().width);
+				window.setHeight(ww.getBounds().height);
+			}
+		}
+		return frame;
 	}
 
 	public static Map<String, Set<Rectangle>> postponeNonShowingAreas(Map<String, Set<Rectangle>> currentAreasToUpdate) {
@@ -661,7 +676,7 @@ public class Util {
 		ImageObserver observer = new ImageObserver() {
 			@Override
 			public synchronized boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-				if ((infoflags & ImageObserver.ALLBITS) == ImageObserver.ALLBITS || (infoflags & ImageObserver.FRAMEBITS) == ImageObserver.FRAMEBITS){
+				if ((infoflags & ImageObserver.ALLBITS) == ImageObserver.ALLBITS || (infoflags & ImageObserver.FRAMEBITS) == ImageObserver.FRAMEBITS) {
 					notifyAll();
 				}
 				return true;

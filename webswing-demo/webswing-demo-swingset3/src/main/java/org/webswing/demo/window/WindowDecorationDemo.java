@@ -1,12 +1,8 @@
 package org.webswing.demo.window;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,14 +38,14 @@ public class WindowDecorationDemo extends JPanel {
 		info.add(new JLabel("Parent:" + getID(parent)));
 		info.add(new JLabel("Modal:" + (owner instanceof JDialog ? ((JDialog) owner).isModal() : "false")));
 		info.add(new JLabel("Always on top:" + (owner == null ? "N" : owner.isAlwaysOnTop())));
-		final JTextField fld_1=new JTextField();
-		JTextField fld_2=new JTextField();
+		final JTextField fld_1 = new JTextField();
+		JTextField fld_2 = new JTextField();
 		fld_1.setColumns(5);
 		fld_2.setColumns(5);
 		fld_1.setInputVerifier(new InputVerifier() {
 			@Override
 			public boolean verify(JComponent jc) {
-				return ((JTextComponent)jc).getText().startsWith("S");
+				return ((JTextComponent) jc).getText().startsWith("S");
 			}
 
 			@Override
@@ -57,33 +53,33 @@ public class WindowDecorationDemo extends JPanel {
 				if (verify(jc))
 					return true;
 				boolean inputOK = showLov();
-				if (inputOK){
+				if (inputOK) {
 					return true;
 				}
-				javax.swing.JTextField source=(javax.swing.JTextField)jc;
+				javax.swing.JTextField source = (javax.swing.JTextField) jc;
 				source.selectAll();
 				java.awt.Toolkit.getDefaultToolkit().beep();
 				return false;
 			}
-			private boolean showLov(){
-				String ok="set def value and go to next field";
-				String stop="stop navigation";
+
+			private boolean showLov() {
+				String ok = "set def value and go to next field";
+				String stop = "stop navigation";
 				List<Object> options = new ArrayList<Object>();
 				Object defaultOption;
 				options.add(ok);
 				options.add(stop);
 				defaultOption = ok;
 				int answer = JOptionPane.showOptionDialog(null, "msg", "title", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options.toArray(), defaultOption);
-				if (answer<0)
+				if (answer < 0)
 					return false;
-				if (options.get(answer).equals(ok)){
+				if (options.get(answer).equals(ok)) {
 					fld_1.setText("S-OK");
 					return true;
 				}
 				return false;
 			}
 		});
-
 
 		info.add(fld_1);
 		info.add(fld_2);
@@ -147,10 +143,10 @@ public class WindowDecorationDemo extends JPanel {
 		JPopupMenu menu = new JPopupMenu("test");
 		JMenuItem win00 = menu.add(new JMenuItem("create window with size (0,0)"));
 		win00.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-			
+
 				JWindow frame = new JWindow();
 				frame.add(new JLabel("test"));
 				frame.pack();
@@ -158,9 +154,38 @@ public class WindowDecorationDemo extends JPanel {
 				frame.setBounds(0, 0, 0, 0);
 			}
 		});
-		menu.add(new JMenuItem("test"));
-		menu.add(new JMenuItem("test"));
-		menu.add(new JMenuItem("test"));
+		JMenuItem translucentWin = new JMenuItem("translucent window");
+		translucentWin.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				TranslucentWindowDemo tw = new TranslucentWindowDemo();
+				tw.setVisible(true);
+			}
+		});
+		menu.add(translucentWin);
+		JMenuItem pixelTranslucentWin = new JMenuItem("pixel translucent window");
+		pixelTranslucentWin.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				GradientTranslucentWindowDemo gtw = new GradientTranslucentWindowDemo();
+				// Display the window.
+				gtw.setVisible(true);
+
+			}
+		});
+		menu.add(pixelTranslucentWin);
+
+		JMenuItem shapeTranslucentWin = new JMenuItem("shaped window");
+		shapeTranslucentWin.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ShapedWindowDemo sw = new ShapedWindowDemo();
+				// Display the window.
+				sw.setVisible(true);
+
+			}
+		});
+		menu.add(shapeTranslucentWin);
 		menu.add(new JMenuItem("test"));
 		menu.add(new JMenuItem("test"));
 		menu.add(new JMenuItem("test"));
@@ -195,7 +220,6 @@ public class WindowDecorationDemo extends JPanel {
 				// get location of Window
 				int thisX = parent.getLocation().x;
 				int thisY = parent.getLocation().y;
-
 				// Determine how much the mouse moved since the initial click
 				int xMoved = (thisX + e.getX()) - (thisX + initialClick.x);
 				int yMoved = (thisY + e.getY()) - (thisY + initialClick.y);
@@ -232,10 +256,10 @@ public class WindowDecorationDemo extends JPanel {
 			content.add(info);
 		}
 		content.add(checkboxes);
+		buttonsPanel.add(context);
 		content.add(buttonsPanel);
 		if (thisWindow != null) {
 			additional.add(moveButton);
-			additional.add(context);
 			if (thisWindow instanceof JFrame) {
 				additional.add(maximize);
 			}
@@ -248,27 +272,27 @@ public class WindowDecorationDemo extends JPanel {
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "testC");
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK), "testV");
 		this.getActionMap().put("testX", new AbstractAction() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(null, "Pressed CTRL+SHIFT+X");
-				
+
 			}
 		});
 		this.getActionMap().put("testC", new AbstractAction() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(null, "Pressed CTRL+SHIFT+C");
-				
+
 			}
 		});
 		this.getActionMap().put("testV", new AbstractAction() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JOptionPane.showMessageDialog(null, "Pressed CTRL+SHIFT+V");
-				
+
 			}
 		});
 	}
@@ -346,7 +370,7 @@ public class WindowDecorationDemo extends JPanel {
 		jp.add(new JTextField(10), "North");
 		JButton x = new JButton("X");
 		jp.add(x);
-		final Popup popup = popupFactory.getPopup(this,jp, buttonLocation.x, buttonLocation.y);
+		final Popup popup = popupFactory.getPopup(this, jp, buttonLocation.x, buttonLocation.y);
 		x.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -375,5 +399,95 @@ public class WindowDecorationDemo extends JPanel {
 	public static void main(String[] args) {
 		JFrame f = frame(new Point(0, 0), false, false);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+
+	public static class TranslucentWindowDemo extends JFrame {
+		public TranslucentWindowDemo() {
+			super("TranslucentWindow");
+			setLayout(new GridBagLayout());
+
+			setSize(300, 200);
+			setLocationRelativeTo(null);
+			setUndecorated(true);
+			setOpacity(0.55f);
+			//Add a sample button.
+			JButton close = new JButton("Close");
+			close.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					TranslucentWindowDemo.this.dispose();
+				}
+			});
+			add(close);
+
+		}
+	}
+
+	public static class GradientTranslucentWindowDemo extends JFrame {
+		public GradientTranslucentWindowDemo() {
+			super("GradientTranslucentWindow");
+			setUndecorated(true);
+
+			setBackground(new Color(0, 0, 0, 0));
+			setSize(new Dimension(300, 200));
+			setLocationRelativeTo(null);
+
+			JPanel panel = new JPanel() {
+				@Override
+				protected void paintComponent(Graphics g) {
+					if (g instanceof Graphics2D) {
+						final int R = 240;
+						final int G = 240;
+						final int B = 240;
+
+						Paint p = new GradientPaint(0.0f, 0.0f, new Color(R, G, B, 0), 0.0f, getHeight(), new Color(R, G, B, 255), true);
+						Graphics2D g2d = (Graphics2D) g;
+						g2d.setPaint(p);
+						g2d.fillRect(0, 0, getWidth(), getHeight());
+					}
+				}
+			};
+			setContentPane(panel);
+			setLayout(new GridBagLayout());
+			JButton close = new JButton("Close");
+			close.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					GradientTranslucentWindowDemo.this.dispose();
+				}
+			});
+			add(close);
+		}
+	}
+
+	public class ShapedWindowDemo extends JFrame {
+		public ShapedWindowDemo() {
+			super("ShapedWindow");
+			setLayout(new GridBagLayout());
+
+			// It is best practice to set the window's shape in
+			// the componentResized method.  Then, if the window
+			// changes size, the shape will be correctly recalculated.
+			addComponentListener(new ComponentAdapter() {
+				// Give the window an elliptical shape.
+				// If the window is resized, the shape is recalculated here.
+				@Override
+				public void componentResized(ComponentEvent e) {
+					setShape(new Ellipse2D.Double(0,0,getWidth(),getHeight()));
+				}
+			});
+
+			setUndecorated(true);
+			setSize(300,200);
+			setLocationRelativeTo(null);
+
+			JButton close = new JButton("Close");
+			close.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					ShapedWindowDemo.this.dispose();
+				}
+			});
+			add(close);		}
 	}
 }

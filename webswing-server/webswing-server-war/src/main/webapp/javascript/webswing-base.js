@@ -1,4 +1,4 @@
-define(['webswing-dd', 'webswing-util'], function amdFactory(WebswingDirectDraw, util) {
+define(['webswing-dd', 'webswing-util','jquery'], function amdFactory(WebswingDirectDraw, util,$) {
     "use strict";
     return function BaseModule() {
         var module = this;
@@ -116,7 +116,7 @@ define(['webswing-dd', 'webswing-util'], function amdFactory(WebswingDirectDraw,
             clearInterval(timer3);
             timer1 = setInterval(api.sendInput, 100);
             timer3 = setInterval(servletHeartbeat, 100000);
-            windowImageHolders = {};
+            windowImageHolders = {};//TODO
             directDraw.dispose();
             directDraw = new WebswingDirectDraw({logDebug: api.cfg.debugLog, ieVersion: api.cfg.ieVersion, dpr: util.dpr});
         }
@@ -312,6 +312,7 @@ define(['webswing-dd', 'webswing-util'], function amdFactory(WebswingDirectDraw,
                 api.processFileDialogEvent(data.fileDialogEvent);
             }
             if (data.closedWindow != null) {
+                $(windowImageHolders[data.closedWindow.id]).remove();
                 delete windowImageHolders[data.closedWindow.id];
             }
             // first is always the background
@@ -333,9 +334,9 @@ define(['webswing-dd', 'webswing-util'], function amdFactory(WebswingDirectDraw,
             }
             // regular windows (background removed)
             if (data.windows != null) {
-                data.windows.reduce(function (sequence, window) {
+                data.windows.reduce(function (sequence, window, index) {
                     return sequence.then(function () {
-                        return renderWindow(window, context);
+                        return renderWindow(window, context, index);
                     }, errorHandler);
                 }, Promise.resolve()).then(function () {
                     ack(data);
@@ -346,9 +347,9 @@ define(['webswing-dd', 'webswing-util'], function amdFactory(WebswingDirectDraw,
             }
         }
 
-        function renderWindow(win, context) {
+        function renderWindow(win, context, index) {
             if (win.directDraw != null) {
-                return renderDirectDrawWindow(win, context);
+                return renderDirectDrawWindow(win, context, index);
             } else {
                 return renderPngDrawWindow(win, context);
             }
@@ -390,40 +391,47 @@ define(['webswing-dd', 'webswing-util'], function amdFactory(WebswingDirectDraw,
             }, Promise.resolve());
         }
 
-        function renderDirectDrawWindow(win, context) {
+        function renderDirectDrawWindow(win, context, index) {
             return new Promise(function (resolved, rejected) {
-                var ddPromise;
-                if (typeof win.directDraw === 'string') {
-                    ddPromise = directDraw.draw64(win.directDraw, windowImageHolders[win.id]);
-                } else {
-                    ddPromise = directDraw.drawBin(win.directDraw, windowImageHolders[win.id]);
-                }
-                ddPromise.then(function (resultImage) {
-                    windowImageHolders[win.id] = resultImage;
-                    var dpr = util.dpr;
-                    for (var x in win.content) {
-                        var winContent = win.content[x];
-                        if (winContent != null) {
-                            var sx = Math.min(resultImage.width, Math.max(0, winContent.positionX * dpr));
-                            var sy = Math.min(resultImage.height, Math.max(0, winContent.positionY * dpr));
-                            var sw = Math.min(resultImage.width - sx, winContent.width * dpr - (sx - winContent.positionX * dpr));
-                            var sh = Math.min(resultImage.height - sy, winContent.height * dpr - (sy - winContent.positionY * dpr));
-
-                            var dx = win.posX * dpr + sx;
-                            var dy = win.posY * dpr + sy;
-                            var dw = sw;
-                            var dh = sh;
-
-                            if (dx <= context.canvas.width && dy <= context.canvas.height && dx + dw > 0 && dy + dh > 0) {
-                                context.drawImage(resultImage, sx, sy, sw, sh, dx, dy, dw, dh);
-                            }
-                        }
+                    var ddPromise;
+                    if (win.directDraw == null) {
+                        ddPromise = Promise.resolve( windowImageHolders[win.id]);
+                    } else if (typeof win.directDraw === 'string') {
+                        ddPromise = directDraw.draw64(win.directDraw, windowImageHolders[win.id]);
+                    } else {
+                        ddPromise = directDraw.drawBin(win.directDraw, windowImageHolders[win.id]);
                     }
-                    resolved();
-                }, function (error) {
-                    rejected(error);
-                });
-            });
+                    ddPromise.then(function (resultImage) {
+                        if(resultImage!=null) {
+                            if(windowImageHolders[win.id] == null){
+                                windowImageHolders[win.id]=resultImage;
+                                resultImage.setAttribute('data-id', win.id);
+                                resultImage.style.position='absolute';
+                                api.cfg.rootElement.append(resultImage);
+                            }
+                            resultImage.style.zIndex='-'+(index+1);
+                            resultImage.style.width=win.width+'px';
+                            resultImage.style.height=win.height+'px';
+                            resultImage.style.left=win.posX+'px';
+                            resultImage.style.top=win.posY+'px';
+
+                            // var dpr = util.dpr;
+                            // var w = resultImage.width;
+                            // var h = resultImage.height;
+                            //
+                            // var dx = win.posX * dpr;
+                            // var dy = win.posY * dpr;
+                            //
+                            // if (dx <= context.canvas.width && dy <= context.canvas.height && dx + w > 0 && dy + h > 0) {
+                            //     context.drawImage(resultImage, 0, 0, w, h, dx, dy, w, h);
+                            // }
+                        }
+                        resolved();
+                    }, function (error) {
+                        rejected(error);
+                    });
+                }
+            );
         }
 
         function adjustCanvasSize(canvas, width, height) {
@@ -491,6 +499,7 @@ define(['webswing-dd', 'webswing-util'], function amdFactory(WebswingDirectDraw,
         }
 
         function getPixels(request) {
+            //TODO
             var result = document.createElement("canvas");
             result.width = request.w;
             result.height = request.h;
@@ -512,4 +521,4 @@ define(['webswing-dd', 'webswing-util'], function amdFactory(WebswingDirectDraw,
             throw error;
         }
     };
-});
+})

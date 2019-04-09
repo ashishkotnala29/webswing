@@ -258,6 +258,16 @@ public class WindowHierarchyTree {
 		return result;
 	}
 
+	public List<String> getZOrder() {
+		List<String> zorder= new ArrayList<>();
+		for (int i = 0; i < zOrder.size(); i++) {
+			String id = ((WebWindowPeer) WebToolkit.targetToPeer(zOrder.get(i).getW())).getGuid();
+			zorder.add(id);
+		}
+		return zorder;
+	}
+
+
 	public void requestRepaintAfterMove(Window w, Rectangle originalPosition) {
 		requestRepaintUnderlying(zOrder.indexOf(lookup.get(w)) + 1, originalPosition);
 		Rectangle newPosition = w.getBounds();

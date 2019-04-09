@@ -584,6 +584,7 @@ public class SwingInstanceImpl implements Serializable, SwingInstance, JvmListen
 
 			swingConfig.addProperty(Constants.SWING_START_SYS_PROP_DIRECTDRAW, appConfig.isDirectdraw());
 			swingConfig.addProperty(Constants.SWING_START_SYS_PROP_DIRECTDRAW_SUPPORTED, handshake.isDirectDrawSupported());
+			swingConfig.addProperty(Constants.SWING_START_SYS_PROP_COMPOSITING_WM, appConfig.isCompositingWinManager());
 			swingConfig.addProperty(Constants.SWING_SESSION_TIMEOUT_SEC, appConfig.getSwingSessionTimeout());
 			swingConfig.addProperty(Constants.SWING_SESSION_TIMEOUT_IF_INACTIVE, appConfig.isTimeoutIfInactive());
 			swingConfig.addProperty("awt.toolkit", webToolkitClass);
